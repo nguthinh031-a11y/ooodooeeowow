@@ -160,7 +160,6 @@
   nav.tabs button .ic{font-size:19px;}
   nav.tabs button.active{color:var(--mint);}
 
-  /* Nút Admin Panel trôi nổi ở góc dưới (phía trên thanh điều hướng) */
   #floatingAdminBtn {
     position: fixed;
     bottom: 70px;
@@ -217,7 +216,6 @@
 
 <div id="toast" class="toast"></div>
 
-<!-- Nút Admin Panel trôi nổi ở góc dưới -->
 <button id="floatingAdminBtn" onclick="switchView('admin')">
   🛠️ Admin Panel
 </button>
@@ -229,25 +227,20 @@
   </header>
 
   <main>
-
-    <!-- ================= HOME ================= -->
     <section class="view active" id="view-home">
       <div class="announce" id="announceBox" style="display:none;">
         <span class="ic">📢</span>
         <div id="announceText"></div>
       </div>
-
       <div class="sectionTitle">Sản phẩm nổi bật</div>
       <div class="grid" id="homeProducts"></div>
     </section>
 
-    <!-- ================= PRODUCTS ================= -->
     <section class="view" id="view-products">
       <div class="sectionTitle">Tất cả sản phẩm</div>
       <div class="grid" id="allProducts"></div>
     </section>
 
-    <!-- ================= DEPOSIT ================= -->
     <section class="view" id="view-deposit">
       <div class="sectionTitle">Nạp tiền</div>
       <div class="rowCard" style="display:block;">
@@ -266,7 +259,6 @@
       <div id="myDeposits"></div>
     </section>
 
-    <!-- ================= PROFILE ================= -->
     <section class="view" id="view-profile">
       <div class="sectionTitle">Hồ sơ</div>
       <div class="rowCard">
@@ -287,10 +279,9 @@
       <div id="mySupport" style="margin-top:12px;"></div>
     </section>
 
-    <!-- ================= ADMIN ================= -->
     <section class="view" id="view-admin">
       <div class="warnBox">
-        ⚠️ Bản này gọi thẳng Telegram Bot API từ trình duyệt bằng token cấu hình trong mã nguồn. Ai xem được source file (View Page Source) đều có thể lấy token và chiếm quyền điều khiển bot. Chỉ dùng cách này để thử nghiệm cá nhân — không host công khai.
+        ⚠️ Bản này gọi thẳng Telegram Bot API từ trình duyệt bằng token cấu hình trong mã nguồn. Chỉ dùng cho thử nghiệm cá nhân.
       </div>
       <div class="adminSwitch">
         <button class="active" data-a="products" onclick="setAdminTab('products')">Sản phẩm</button>
@@ -314,7 +305,7 @@
 
       <div id="admin-settings" style="display:none;">
         <label class="f">Thông báo hiển thị khi mở miniapp</label>
-        <textarea id="setAnnounce" placeholder="VD: Chào mừng đến shop, nạp tiền được duyệt trong 5 phút!"></textarea>
+        <textarea id="setAnnounce" placeholder="VD: Chào mừng đến shop!"></textarea>
 
         <label class="f">Tên ngân hàng</label>
         <input id="setBankName" placeholder="VD: MB Bank">
@@ -327,7 +318,6 @@
         <button class="btn primary block" onclick="saveSettings()">Lưu cài đặt</button>
       </div>
     </section>
-
   </main>
 
   <nav class="tabs">
@@ -339,7 +329,7 @@
   </nav>
 </div>
 
-<!-- ============ Modals ============ -->
+<!-- Modals -->
 <div class="modalBg" id="buyModalBg">
   <div class="modal">
     <button class="modalClose" onclick="closeModal('buyModalBg')">✕</button>
@@ -358,7 +348,7 @@
     <label class="f">Tên sản phẩm</label>
     <input id="pmName" placeholder="VD: Key Windows 11 Pro">
     <label class="f">Mô tả</label>
-    <textarea id="pmDesc" placeholder="Mô tả ngắn về sản phẩm"></textarea>
+    <textarea id="pmDesc" placeholder="Mô tả ngắn"></textarea>
     <label class="f">Giá bán (VNĐ)</label>
     <input type="number" id="pmPrice" placeholder="99000">
     <button class="btn primary block" onclick="saveProduct()">Lưu sản phẩm</button>
@@ -371,8 +361,7 @@
     <h2 id="kmTitle">Quản lý key</h2>
     <input type="hidden" id="kmProductId">
     <label class="f">Thêm key mới (mỗi dòng 1 key)</label>
-    <textarea id="kmNewKeys" placeholder="ABCD-1234-EFGH
-XXXX-YYYY-ZZZZ"></textarea>
+    <textarea id="kmNewKeys" placeholder="ABCD-1234-EFGH"></textarea>
     <button class="btn primary block" onclick="addKeys()">+ Thêm key vào kho</button>
     <div class="sectionTitle">Key còn trong kho (<span id="kmCount">0</span>)</div>
     <div id="kmKeyList"></div>
@@ -380,34 +369,47 @@ XXXX-YYYY-ZZZZ"></textarea>
 </div>
 
 <script>
-/* =========================================================
-   CẤU HÌNH
-   ========================================================= */
-const BOT_TOKEN  = "8774262600:AAFcG0dGDWHJjWpHimRErS9vVbWQj82TdNY"; // token lấy từ @BotFather
-const ADMIN_IDS  = [8647955563];            // ID Telegram (số) của admin (Thay ID của bạn vào đây)
+/* CẤU HÌNH */
+const BOT_TOKEN  = "8774262600:AAFcG0dGDWHJjWpHimRErS9vVbWQj82TdNY"; // token từ @BotFather
+const ADMIN_IDS  = [123456789];            // Thay ID Telegram của bạn vào đây (số)
+const MINIAPP_URL = "https://t.me/TenBotCuaBạn_Bot/ShopApp"; // Thay link Web App bot của bạn vào đây
 
 const TG_API = BOT_TOKEN && BOT_TOKEN !== "8774262600:AAFcG0dGDWHJjWpHimRErS9vVbWQj82TdNY"
   ? `https://api.telegram.org/bot${BOT_TOKEN}`
   : null;
 
-async function tgSendMessage(chatId, text){
+/* Gửi tin nhắn Telegram kèm tuỳ chọn Inline Keyboard (nút bấm mở shop) */
+async function tgSendMessage(chatId, text, includeShopButton = false){
   if(!TG_API) return;
   try{
+    const bodyData = { 
+      chat_id: chatId, 
+      text, 
+      parse_mode:'HTML' 
+    };
+
+    if(includeShopButton && MINIAPP_URL){
+      bodyData.reply_markup = {
+        inline_keyboard: [
+          [{ text: "🛒 Mở Shop Mua Ngay", web_app: { url: MINIAPP_URL } }]
+        ]
+      };
+    }
+
     await fetch(`${TG_API}/sendMessage`, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ chat_id: chatId, text, parse_mode:'HTML' })
+      body: JSON.stringify(bodyData)
     });
   }catch(e){ console.error('Gửi tin nhắn Telegram thất bại:', e); }
 }
+
 async function notifyUser(userId, text){ await tgSendMessage(userId, text); }
-async function notifyAdmins(text){
-  for(const id of ADMIN_IDS){ await tgSendMessage(id, text); }
+async function notifyAdmins(text, includeButton = false){
+  for(const id of ADMIN_IDS){ await tgSendMessage(id, text, includeButton); }
 }
 
-/* =========================================================
-   STORAGE LAYER
-   ========================================================= */
+/* STORAGE LAYER */
 const hasCloudStorage = !!(window.storage && window.storage.get);
 
 async function dbGet(key, fallback){
@@ -447,9 +449,6 @@ let STATE = {
   isAdmin: false
 };
 
-/* =========================================================
-   TELEGRAM SDK
-   ========================================================= */
 function getTelegramUser(){
   try{
     const tg = window.Telegram && window.Telegram.WebApp;
@@ -475,9 +474,6 @@ function getTelegramUser(){
   return { id: Number(devId), first_name:"Khách (demo)", last_name:"", username:"demo_user" };
 }
 
-/* =========================================================
-   LOADER
-   ========================================================= */
 function runLoader(){
   return new Promise(resolve=>{
     let pct = 0;
@@ -502,12 +498,8 @@ function runLoader(){
   });
 }
 
-/* =========================================================
-   INIT
-   ========================================================= */
 async function init(){
   const loaderDone = runLoader();
-
   const tgUser = getTelegramUser();
   STATE.products = await dbGet(K_PRODUCTS, []);
   STATE.users    = await dbGet(K_USERS, {});
@@ -540,7 +532,7 @@ async function init(){
   
   if(STATE.isAdmin){
     document.getElementById('adminTabBtn').style.display = 'flex';
-    document.getElementById('floatingAdminBtn').style.display = 'flex'; // Hiển thị nút nổi góc dưới cho admin
+    document.getElementById('floatingAdminBtn').style.display = 'flex';
   }
 
   renderAll();
@@ -551,9 +543,6 @@ async function init(){
   }
 }
 
-/* =========================================================
-   NAVIGATION
-   ========================================================= */
 function switchView(name){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('view-'+name).classList.add('active');
@@ -582,9 +571,6 @@ function toast(msg){
 }
 function money(n){ return Number(n||0).toLocaleString('vi-VN') + '₫'; }
 
-/* =========================================================
-   RENDER
-   ========================================================= */
 function renderAll(){
   document.getElementById('balanceTop').textContent = money(STATE.me.balance);
   renderProducts();
@@ -650,8 +636,11 @@ async function buyProduct(id){
   closeModal('buyModalBg');
   toast('Mua thành công! Key: ' + key);
 
-  notifyUser(STATE.me.id, `✅ Bạn đã mua thành công <b>${escapeHtml(p.name)}</b>\nGiá: ${money(p.price)}\nKey của bạn:\n<code>${escapeHtml(key)}</code>`);
-  notifyAdmins(`🛒 ${STATE.me.first_name} (ID ${STATE.me.id}) vừa mua <b>${escapeHtml(p.name)}</b> — ${money(p.price)}`);
+  // 1. Gửi thông báo chi tiết key về chat bot cá nhân của người mua
+  notifyUser(STATE.me.id, `✅ Bạn đã mua thành công <b>${escapeHtml(p.name)}</b>\n- Giá: ${money(p.price)}\n- Key của bạn:\n<code>${escapeHtml(key)}</code>`);
+  
+  // 2. Gửi thông báo mua hàng về chat bot cho Admin
+  notifyAdmins(`🛒 <b>CÓ GIAO DỊCH MUA HÀNG MỚI</b>\n- Khách: ${escapeHtml(STATE.me.first_name)} (ID: <code>${STATE.me.id}</code>)\n- Sản phẩm: <b>${escapeHtml(p.name)}</b>\n- Giá: <b>${money(p.price)}</b>`);
 
   renderAll();
 }
@@ -689,7 +678,8 @@ async function submitDeposit(){
   document.getElementById('depNote').value='';
   toast('Đã gửi yêu cầu, chờ admin duyệt');
 
-  notifyAdmins(`💳 Yêu cầu nạp tiền mới\nTừ: ${escapeHtml(dep.username||String(dep.userId))} (ID ${dep.userId})\nSố tiền: ${money(dep.amount)}${dep.note ? '\nGhi chú: '+escapeHtml(dep.note) : ''}`);
+  // 3. Gửi thông báo yêu cầu nạp tiền về chat bot của Admin kèm nút mở shop
+  notifyAdmins(`💳 <b>YÊU CẦU NẠP TIỀN MỚI</b>\n- Khách: ${escapeHtml(dep.username||String(dep.userId))} (ID: <code>${dep.userId}</code>)\n- Số tiền: <b>${money(dep.amount)}</b>${dep.note ? '\n- Ghi chú: '+escapeHtml(dep.note) : ''}`, true);
 
   renderAll();
 }
@@ -724,13 +714,9 @@ async function submitSupport(){
   toast('Đã gửi yêu cầu hỗ trợ');
 
   notifyAdmins(`🆘 Yêu cầu hỗ trợ mới\nTừ: ${escapeHtml(s.username||String(s.userId))} (ID ${s.userId})\nNội dung: ${escapeHtml(s.message)}`);
-
   renderProfile();
 }
 
-/* =========================================================
-   ADMIN
-   ========================================================= */
 function renderAdmin(){
   if(!STATE.isAdmin) return;
   if(currentAdminTab==='products') renderAdminProducts();
@@ -752,7 +738,7 @@ function renderAdminProducts(){
         <button class="btn danger small" onclick="deleteProduct('${p.id}')">Xoá</button>
       </div>
     </div>
-  `).join('') : `<div class="empty"><span class="ic">📦</span>Chưa có sản phẩm, bấm "Thêm sản phẩm" để bắt đầu.</div>`;
+  `).join('') : `<div class="empty"><span class="ic">📦</span>Chưa có sản phẩm.</div>`;
 }
 
 function openProductModal(id){
@@ -831,12 +817,17 @@ async function addKeys(){
   const raw = document.getElementById('kmNewKeys').value;
   const newKeys = raw.split('\n').map(x=>x.trim()).filter(Boolean);
   if(newKeys.length===0){ toast('Nhập ít nhất 1 key'); return; }
+  
   p.keys.push(...newKeys);
   await dbSet(K_PRODUCTS, STATE.products);
   document.getElementById('kmNewKeys').value = '';
   toast('Đã thêm ' + newKeys.length + ' key');
+  
   renderKeyList();
   renderAdminProducts();
+
+  // 🔔 THÔNG BÁO UP KEY MỚI KÈM NÚT MỞ SHOP Ở DƯỚI
+  notifyAdmins(`📦 <b>SẢN PHẨM MỚI VỀ KHO!</b>\n\n- Sản phẩm: <b>${escapeHtml(p.name)}</b>\n- Số lượng vừa nạp: <b>${newKeys.length} key</b>\n- Giá bán: <b>${money(p.price)}</b>`, true);
 }
 
 async function removeKey(id, index){
@@ -885,8 +876,7 @@ async function rejectDeposit(id){
   await dbSet(K_DEPOSITS, STATE.deposits);
   toast('Đã từ chối yêu cầu');
 
-  notifyUser(d.userId, `❌ Yêu cầu nạp <b>${money(d.amount)}</b> của bạn đã bị từ chối. Vui lòng liên hệ hỗ trợ nếu cần.`);
-
+  notifyUser(d.userId, `❌ Yêu cầu nạp <b>${money(d.amount)}</b> của bạn đã bị từ chối.`);
   renderAll();
 }
 
